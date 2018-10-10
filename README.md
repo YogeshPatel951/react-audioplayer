@@ -3,6 +3,8 @@
   
 
 Custom Javascript Audio Player with ReactJS and SCSS
+## Demo
+[https://react-audioplayer.herokuapp.com/](https://react-audioplayer.herokuapp.com/)
 
 ## Usage  
 
