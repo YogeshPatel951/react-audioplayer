@@ -37,9 +37,9 @@ class Player extends Component {
             currentTitle: currentSong.title,
             currentArtist: currentSong.artistname,
             currentImage: currentSong.image,
-            isplaying: true
+            //isplaying: true
         })
-        this.player.play();
+        //this.player.play();
     }
     PlayOrPause(){
         if(this.player.paused){
@@ -93,10 +93,18 @@ class Player extends Component {
         this.setState({totalTime: min + ":" + sec});
     }
     onBarClick(e){
+        var elem = e.target;
+        var pa= elem.offsetParent || elem;
+        var percentt = (((elem.offsetWidth/pa.offsetWidth)).toFixed(2));
+
         const offsetX = e.nativeEvent.offsetX;
         const offsetWidth = e.nativeEvent.target.offsetWidth;
+        
         const percent = offsetX / offsetWidth;
-        this.player.currentTime = percent * this.player.duration;
+        console.log(percentt)
+        this.setState({progressbar:percentt});
+        this.player.currentTime = percentt  * this.player.duration;
+        
     }
     onVolumeClick(e){
         const offsetX = e.nativeEvent.offsetX;
@@ -127,6 +135,7 @@ class Player extends Component {
             that.setState({volumebar: this.volume * 100})
         }, false);
         this.player.addEventListener('timeupdate', function(){
+            console.log("called")
             let position = this.currentTime / this.duration;
             that.setState({progressbar: position * 100});
             that.convertTime(Math.round(this.currentTime));
@@ -136,47 +145,46 @@ class Player extends Component {
             }
         })
     }
+
+    handleChange = (event) =>{
+        if(event.target.value != NaN){
+            console.log(event.target.value)
+            this.setState({progressbar:event.target.value})
+            this.player.currentTime=(event.target.value/100*this.player.duration) 
+        }
+        else{
+            this.setState({progressbar:0})
+        }
+        
+    }
+
+
     render() {
         return (
-            <div id="player">
-                <div className="now-playing">
-                    <img src={this.state.currentImage} alt={this.state.currentTitle} />
-                    <div className="meta">
-                        <span className="title">{this.state.currentTitle}</span>
-                        <span className="artist-name">{this.state.currentArtist}</span>
-                    </div>
+            <>
+            <div id="player" className="container-fluid">
+                <div style={{marginBottom:"0.2rem"}}>
+                <input type="range"  defaultValue="0" value={this.state.progressbar != NaN ? this.state.progressbar : 0} onChange={this.handleChange} id="formControlRange" style={{top:"0"}} />
+                {this.state.progressbar > 0 &&
+                          <div style={{width: this.state.progressbar + '%',backgroundColor:"rgba(255,0,0,0.6)",position:"absolute",top:"0",height:"4px",overflow:"hidden"}} onClick={this.onBarClick}>o</div> 
+                       }
                 </div>
-
-                <div className="middle-part">
-                    <div className="controls">
-                        <button className={this.state.shuffle ? "no-style shuffle active": "no-style shuffle"} onClick={this.toggleShuffle}><i className="fa fa-random"></i></button>
-                        <button className="no-style" onClick={this.playPrev}><i className="fa fa-step-backward"></i></button>
-                        <button className="no-style play" onClick={this.PlayOrPause}>
-                            <i className={this.state.isplaying ? "far fa-pause-circle" : "far fa-play-circle"}></i>
-                        </button>
-                        <button className="no-style" onClick={this.playNext}><i className="fa fa-step-forward"></i></button>
-                        <button className={this.state.loop ? "no-style loop active": "no-style loop"} onClick={this.toggleLoop}><i className="fa fa-sync-alt"></i></button>
+                <div className="row">
+                    <div className="col-xs-3 now-playing" style={{textAlign:"center"}}>
+                        <img src={this.state.currentImage}></img>
                     </div>
-                    <div className="progress">
-                        <div className="progress-time">{this.state.currentTime}</div>
-                        <div className="bar" onClick={this.onBarClick}>
-                        {this.state.progressbar > 0 &&
-                            <div style={{width: this.state.progressbar + '%'}}></div>
-                        }
+                    <div className="col-xs-6 now-playing">
+                        <div className="meta">
+                        <div className="title">{this.state.currentTitle}</div>
+                        <div className="artist-name">{this.state.currentArtist}</div>
                         </div>
-                        <div className="progress-time">{this.state.totalTime}</div>
                     </div>
-                </div>
-
-                <div className="volume-bar">
-                    <button className="no-style" onClick={this.toggleVolume}>
-                        <i className={this.state.volumeup ? "fa fa-volume-up": "fa fa-volume-off"}></i>
-                    </button>
-                    <div className="fill" onClick={this.onVolumeClick}>
-                        <div style={{width: this.state.volumebar + '%'}}></div>
+                    <div className="col-xs-3" style={{textAlign:"right"}} onClick={this.PlayOrPause}>
+                             <i  className={this.state.isplaying ? "fas fa-pause-circle" : "fas fa-play-circle"} style={{fontSize:"4rem",marginTop:"0.5rem",marginRight:"10px",color:"red",overflow:"hidden"}}></i>
                     </div>
-                </div>
+                </div> 
             </div>
+            </>
         );
     }
 }
